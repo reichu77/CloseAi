@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_test
+          MYSQL_DATABASE: closeai_test
+          MYSQL_USER: closeai
+          MYSQL_PASSWORD: closeai_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -u closeai -pcloseai_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: apps/api
+
+      - name: Type check
+        run: npx tsc --noEmit
+        working-directory: apps/api
+
+      - name: Run tests
+        run: npm test
+        working-directory: apps/api
+        env:
+          NODE_ENV: test
+          PORT: 3000
+          API_SECRET: test-secret
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_USER: closeai
+          DB_PASSWORD: closeai_test
+          DB_NAME: closeai_test
+          REDIS_URL: redis://localhost:6379
+          META_VERIFY_TOKEN: test-token
+          META_APP_SECRET: test-secret
+          META_ACCESS_TOKEN: test-token
+          AI_PROVIDER: anthropic
+          ANTHROPIC_API_KEY: test-key
