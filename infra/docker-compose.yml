@@ -9,6 +9,8 @@ services:
       - '3000:3000'
     volumes:
       - ../apps/api/src:/app/src  # hot reload
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -19,11 +21,11 @@ services:
       DB_PASSWORD: closeai_dev
       DB_NAME: closeai
       REDIS_URL: redis://redis:6379
-      META_VERIFY_TOKEN: dev-verify-token
-      META_APP_SECRET: dev-app-secret
-      META_ACCESS_TOKEN: dev-access-token
+      META_VERIFY_TOKEN: ${META_VERIFY_TOKEN}
+      META_APP_SECRET: ${META_APP_SECRET}
+      META_ACCESS_TOKEN: ${META_ACCESS_TOKEN}
       AI_PROVIDER: anthropic
-      ANTHROPIC_API_KEY: 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
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
 
     depends_on:
       mysql:

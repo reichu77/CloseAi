@@ -1,31 +1,27 @@
 import type { ClientContext } from './orchestrator'
 import { logger } from '../../shared/utils/logger'
 
-// Guardrails básicos para o MVP.
-// Expande aqui: detecção de alucinações de preço, PII leaking, etc.
-
 const PRICE_PATTERN = /€\s?\d+|\d+\s?euros?|\d+[.,]\d{2}\s?€/gi
 
 export const guardrails = {
   validate(reply: string, ctx: ClientContext): string {
-    // Se o agente menciona preços mas o catálogo está vazio, remove e substitui
-    if (ctx.catalogChunks.length === 0 && PRICE_PATTERN.test(reply)) {
-      logger.warn(
-        { clientId: ctx.clientId },
-        'Guardrail: agent mentioned prices with empty catalog — sanitizing',
-      )
-      return reply.replace(
-        PRICE_PATTERN,
-        '[preço a confirmar pela equipa]',
-      )
+    let result = reply
+
+    // Catálogo vazio mas agente inventou preços → substitui
+    if (ctx.catalogChunks.length === 0 && PRICE_PATTERN.test(result)) {
+      logger.warn({ clientId: ctx.clientId }, 'Guardrail: preço inventado com catálogo vazio')
+      result = result.replace(PRICE_PATTERN, '[valor a confirmar]')
     }
 
-    // Trunca respostas muito longas para WhatsApp
-    if (reply.length > 1500) {
-      logger.warn({ clientId: ctx.clientId }, 'Guardrail: reply too long, truncating')
-      return reply.slice(0, 1450) + '...'
+    // Respostas muito longas: corta num ponto final para não parecer truncado
+    if (result.length > 1500) {
+      logger.warn({ clientId: ctx.clientId }, 'Guardrail: resposta muito longa, a cortar')
+      const cutoff = result.lastIndexOf('.', 1400)
+      result = cutoff > 800
+        ? result.slice(0, cutoff + 1) + '\n\nSe quiseres mais detalhes é só dizer 😊'
+        : result.slice(0, 1400) + '...'
     }
 
-    return reply
+    return result
   },
 }

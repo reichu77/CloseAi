@@ -3,12 +3,23 @@ import { config } from './config'
 import { checkDbConnection } from './config/database'
 import { logger } from './shared/utils/logger'
 import webhookRoutes from './api/routes/webhook.routes'
+import chatRoutes from './api/routes/chat.routes'
 import { AppError } from './shared/errors/app.error'
 
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// CORS para o ficheiro de teste local (apenas dev)
+if (process.env.NODE_ENV !== 'production') {
+  app.use((_req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    next()
+  })
+}
 
 // Health check
 app.get('/health', (_req, res) => {
@@ -17,6 +28,9 @@ app.get('/health', (_req, res) => {
 
 // Rotas
 app.use('/webhook', webhookRoutes)
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/chat', chatRoutes)
+}
 
 // Error handler global
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

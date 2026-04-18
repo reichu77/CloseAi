@@ -1,21 +1,18 @@
-// Contrato comum para mensagens normalizadas de qualquer canal.
-// O conversation engine nunca sabe de onde a mensagem veio.
-
 export type Channel = 'whatsapp' | 'instagram' | 'widget'
 
 export type MessageType = 'text' | 'image' | 'audio' | 'document' | 'interactive'
 
 export interface IncomingMessage {
-  id: string              // ID único da mensagem no canal origem
+  id: string
   channel: Channel
-  clientId: string        // ID da empresa cliente (dono do agente)
-  contactId: string       // ID do lead/utilizador no canal (ex: número whatsapp)
+  clientId: string
+  contactId: string
   contactName?: string
   type: MessageType
   text?: string
   mediaUrl?: string
   timestamp: Date
-  raw: Record<string, unknown>  // Payload original, para debugging
+  raw: Record<string, unknown>
 }
 
 export interface OutgoingMessage {
@@ -26,13 +23,24 @@ export interface OutgoingMessage {
   replyToMessageId?: string
 }
 
+// Estado de qualificação do lead — actualizado incrementalmente a cada turno
+export interface LeadState {
+  name?: string
+  intent?: 'compra' | 'arrendamento'
+  budgetMax?: number
+  zone?: string
+  shownPropertyRefs?: string[]       // referências dos imóveis já mostrados
+  qualificationComplete?: boolean    // temos intent + budget + zone
+  requestedHuman?: boolean           // pediu falar com humano
+}
+
 export interface ConversationSession {
   sessionId: string
   clientId: string
   contactId: string
   channel: Channel
   messages: SessionMessage[]
-  metadata: Record<string, unknown>
+  leadState: LeadState
   createdAt: Date
   updatedAt: Date
 }

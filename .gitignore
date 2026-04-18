@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment — nunca commitar chaves reais
+.env
+.env.local
+.env.*.local
+infra/.env
+
+# Build
+dist/
+build/
+
+# Claude Code — configuração local
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
