@@ -37,8 +37,9 @@ function formatCatalogItem(row: CatalogRow): string {
 
   const summary = parts.length > 0 ? parts.join(' · ') : ''
   const desc    = row.description ? `\n${row.description}` : ''
+  const url     = meta.url ? `\n${meta.url}` : ''
 
-  return `**${row.name}**${summary ? `\n${summary}` : ''}${desc}`.trim()
+  return `**${row.name}**${summary ? `\n${summary}` : ''}${desc}${url}`.trim()
 }
 
 export const clientService = {

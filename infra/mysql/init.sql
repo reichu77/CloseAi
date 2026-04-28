@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS catalog_items (
   INDEX idx_client_id (client_id),
   -- Índices funcionais para queries dentro do JSON (MySQL 8.0+)
   INDEX idx_available (available),
+  -- Necessário para o MATCH...AGAINST do rag.service.ts
+  FULLTEXT INDEX idx_fulltext_catalog (name, description),
   CONSTRAINT fk_catalog_client FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -201,7 +203,8 @@ VALUES
     'garagem',               true,
     'certificado_energetico','B',
     'tipo',                  'venda',
-    'referencia',            'PRT-001'
+    'referencia',            'PRT-001',
+    'url',                   'https://imobiliariasilva.pt/imoveis/ref-prt-001'
   )
 ),
 (
@@ -219,7 +222,8 @@ VALUES
     'garagem',               false,
     'certificado_energetico','A',
     'tipo',                  'arrendamento',
-    'referencia',            'MAT-002'
+    'referencia',            'MAT-002',
+    'url',                   'https://imobiliariasilva.pt/imoveis/ref-mat-002'
   )
 ),
 (
@@ -237,6 +241,7 @@ VALUES
     'garagem',               true,
     'certificado_energetico','B+',
     'tipo',                  'venda',
-    'referencia',            'CAS-003'
+    'referencia',            'CAS-003',
+    'url',                   'https://imobiliariasilva.pt/imoveis/ref-cas-003'
   )
 );
